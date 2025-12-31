@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MyStudy Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+        h2, h3 {
+            margin-top: 25px;
+        }
+        a {
+            text-decoration: none;
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>📘 MyStudy Dashboard</h2>
+<a href="{{ url_for('main.logout') }}">Logout</a>
+
+<hr>
+
+<h3>➕ Daily Study Entry</h3>
+<form method="post">
+    Date:
+    <input type="date" name="date" required><br><br>
+
+    Subject:
+    <input type="text" name="subject" required><br><br>
+
+    Study Hours:
+    <input type="number" name="hours" min="1" required><br><br>
+
+    <button type="submit">Save</button>
+</form>
+
+<hr>
+
+<h3>🗂 Study Log</h3>
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Subject</th>
+        <th>Hours</th>
+        <th>Action</th>
+    </tr>
+
+    {% for row in logs %}
+    <tr>
+        <td>{{ row.date }}</td>
+        <td>{{ row.subject }}</td>
+        <td>{{ row.study_hours }}</td>
+        <td>
+            <a href="{{ url_for('main.delete_log', id=row.id) }}"
+               onclick="return confirm('Delete this entry?')">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<h3>📊 Analytics</h3>
+<p><b>Total Study Hours:</b> {{ total_hours }}</p>
+
+<h4>Subject-wise Summary</h4>
+<table>
+    <tr>
+        <th>Subject</th>
+        <th>Total Hours</th>
+    </tr>
+    {% for row in subject_summary %}
+    <tr>
+        <td>{{ row.subject }}</td>
+        <td>{{ row.study_hours }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<h3>📈 Subject-wise Study Chart</h3>
+<img src="{{ url_for('static', filename='study_chart.png') }}"
+     alt="Study Chart"
+     width="500">
+
+</body>
+<footer>&copy; 2025 Rajveer. All rights reserved.</footer>
+</html>
