@@ -8,98 +8,206 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
         }
+
+        header {
+            background: #4f46e5;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header a {
+            color: #ffdddd;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 25px auto;
+            padding: 0 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        input, button {
+            padding: 8px 10px;
+            width: 100%;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
         table {
+            width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
-        th, td {
-            padding: 8px 12px;
-            border: 1px solid #333;
+
+        th {
+            background: #eef2ff;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
             text-align: center;
         }
-        h2, h3 {
-            margin-top: 25px;
-        }
-        a {
-            text-decoration: none;
+
+        .delete-link {
             color: red;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .delete-link:hover {
+            text-decoration: underline;
+        }
+
+        .analytics p {
+            font-size: 16px;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 6px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #111827;
+            color: #ccc;
+            margin-top: 30px;
         }
     </style>
 </head>
 
 <body>
 
-<h2>📘 MyStudy Dashboard</h2>
-<a href="{{ url_for('main.logout') }}">Logout</a>
+<header>
+    <h2>📘 MyStudy Dashboard</h2>
+    <a href="{{ url_for('main.logout') }}">Logout</a>
+</header>
 
-<hr>
+<div class="container">
 
-<h3>➕ Daily Study Entry</h3>
-<form method="post">
-    Date:
-    <input type="date" name="date" required><br><br>
+    <!-- Daily Study Entry -->
+    <div class="card">
+        <h3>➕ Daily Study Entry</h3>
+        <form method="post">
+            <label>Date</label>
+            <input type="date" name="date" required>
 
-    Subject:
-    <input type="text" name="subject" required><br><br>
+            <label>Subject</label>
+            <input type="text" name="subject" required>
 
-    Study Hours:
-    <input type="number" name="hours" min="1" required><br><br>
+            <label>Study Hours</label>
+            <input type="number" name="hours" min="1" required>
 
-    <button type="submit">Save</button>
-</form>
+            <button type="submit">Save Entry</button>
+        </form>
+    </div>
 
-<hr>
+    <!-- Study Log -->
+    <div class="card">
+        <h3>🗂 Study Log</h3>
+        <table>
+            <tr>
+                <th>Date</th>
+                <th>Subject</th>
+                <th>Hours</th>
+                <th>Action</th>
+            </tr>
 
-<h3>🗂 Study Log</h3>
-<table>
-    <tr>
-        <th>Date</th>
-        <th>Subject</th>
-        <th>Hours</th>
-        <th>Action</th>
-    </tr>
+            {% for row in logs %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>{{ row.subject }}</td>
+                <td>{{ row.study_hours }}</td>
+                <td>
+                    <a class="delete-link"
+                       href="{{ url_for('main.delete_log', id=row.id) }}"
+                       onclick="return confirm('Delete this entry?')">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 
-    {% for row in logs %}
-    <tr>
-        <td>{{ row.date }}</td>
-        <td>{{ row.subject }}</td>
-        <td>{{ row.study_hours }}</td>
-        <td>
-            <a href="{{ url_for('main.delete_log', id=row.id) }}"
-               onclick="return confirm('Delete this entry?')">Delete</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+    <!-- Analytics -->
+    <div class="card analytics">
+        <h3>📊 Analytics</h3>
+        <p><b>Total Study Hours:</b> {{ total_hours }}</p>
 
-<hr>
+        <h4>Subject-wise Summary</h4>
+        <table>
+            <tr>
+                <th>Subject</th>
+                <th>Total Hours</th>
+            </tr>
+            {% for row in subject_summary %}
+            <tr>
+                <td>{{ row.subject }}</td>
+                <td>{{ row.study_hours }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 
-<h3>📊 Analytics</h3>
-<p><b>Total Study Hours:</b> {{ total_hours }}</p>
+    <!-- Chart -->
+        <div class="card">
+        <h3>📈 Subject-wise Study Chart</h3>
+        <img src="{{ url_for('static', filename='study_chart.png') }}"
+             alt="Subject-wise Study Chart">
+    </div>
 
-<h4>Subject-wise Summary</h4>
-<table>
-    <tr>
-        <th>Subject</th>
-        <th>Total Hours</th>
-    </tr>
-    {% for row in subject_summary %}
-    <tr>
-        <td>{{ row.subject }}</td>
-        <td>{{ row.study_hours }}</td>
-    </tr>
-    {% endfor %}
-</table>
+</div>
 
-<hr>
-
-<h3>📈 Subject-wise Study Chart</h3>
-<img src="{{ url_for('static', filename='study_chart.png') }}"
-     alt="Study Chart"
-     width="500">
+<footer>
+    &copy; 2025 Rajveer | MyStudy Project
+</footer>
 
 </body>
-<footer>&copy; 2025 Rajveer. All rights reserved.</footer>
 </html>
